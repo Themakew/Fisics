@@ -5,77 +5,77 @@
 
 using namespace std;
 
-#define LINES 250
-#define COLUMNS 250
+#define LINES 400
+#define COLUMNS 400
 
-int result[400][500], p[5], xAxis, yAxis;
+int matrixWithThePointToPlot[500][500], neiborhoodPoints[5], xAxis, yAxis;
 
 //verifica se existe pelo menos um ponto já preenchido ao redor do novo ponto criado
-int checkPoint(int xAxis, int yAxis)
+int checkExistingPoint(int xAxis, int yAxis)
 {
 	int value = 0;
 
-	if(result[xAxis+1][yAxis] == 1 || result[xAxis-1][yAxis] == 1 || result[xAxis][yAxis+1] == 1 || result[xAxis][yAxis-1] == 1)
+	if(matrixWithThePointToPlot[xAxis+1][yAxis] == 1 || matrixWithThePointToPlot[xAxis-1][yAxis] == 1 || matrixWithThePointToPlot[xAxis][yAxis+1] == 1 || matrixWithThePointToPlot[xAxis][yAxis-1] == 1)
 		value = 1;
 
 	return value;
 }
 
 //cria um novo ponto random se orientando com os pontos já criados
-void nova()
+void createANewRandowPoint()
 {
-	int c1 = 0, pos;
+	int auxiliaryVarible = 0, randomPointPosition;
+
 	do
 	{
-		pos = rand() % 4;
+		randomPointPosition = rand() % 4;
 
-		switch(pos)
+		switch(randomPointPosition)
 		{
 			case 0:
-				if(p[2] == 1)
+				if(neiborhoodPoints[2] == 1)
 					continue;
 				xAxis = 1;
 				yAxis = (rand() % COLUMNS) + 1;
 				break;
 			case 1:
-				if(p[4] == 1)
+				if(neiborhoodPoints[4] == 1)
 					continue;
 				yAxis = 1;
 				xAxis = (rand() % LINES) + 1;
 				break;
 			case 2:
-				if(p[1] == 1)
+				if(neiborhoodPoints[1] == 1)
 					continue;
 				xAxis = LINES;
 				yAxis = (rand() % COLUMNS) + 1;
 				break;
 			case 3:
-				if(p[3] == 1)
+				if(neiborhoodPoints[3] == 1)
 					continue;
 				yAxis = COLUMNS;
 				xAxis = (rand() % LINES) + 1;
 				break;
-
 		}
 
-		if(result[xAxis][yAxis] == 0)
+		if(matrixWithThePointToPlot[xAxis][yAxis] == 0)
 		{
-			result[xAxis][yAxis] = 1;
-			c1 = 1;
+			matrixWithThePointToPlot[xAxis][yAxis] = 1;
+			auxiliaryVarible = 1;
 		}
-	} while(c1 != 1);
+	} while(auxiliaryVarible != 1);
 }
 
 //Se movimento no "mapa" para adicionar um novo ponto em um lugar que não exista
-void movimenta()
+void moveToAddANewPoint()
 {
-	int pp, ii, jj;
+	int randomPointPosition;
 
-	result[xAxis][yAxis] = 0;
+	matrixWithThePointToPlot[xAxis][yAxis] = 0;
 
-	pp = (rand() % 4) + 1;
+	randomPointPosition = (rand() % 4) + 1;
 
-	switch(pp)
+	switch(randomPointPosition)
 	{
 		case 1:
 			yAxis = yAxis+1;
@@ -91,80 +91,83 @@ void movimenta()
 			break;
 	}
 
-	if(xAxis > LINES || xAxis < 1 || yAxis > COLUMNS || yAxis < 1)//Se chegou em um ponto fora do mapa cria uma nova partícula
-		nova();
+	if(xAxis > LINES || xAxis < 1 || yAxis > COLUMNS || yAxis < 1)//Se chegou em um ponto fora do mapa cria uma createANewRandowPoint partícula
+		createANewRandowPoint();
 	else
 	{
-		result[xAxis][yAxis] = 1;
-		if(checkPoint(xAxis,yAxis) == 1)
+		matrixWithThePointToPlot[xAxis][yAxis] = 1;
+
+		if(checkExistingPoint(xAxis,yAxis) == 1)
 		{
 			if(xAxis == LINES || xAxis == 1 || yAxis == COLUMNS || yAxis == 1)
 			{
 				if(xAxis == LINES)
-					p[1] = 1;
+					neiborhoodPoints[1] = 1;
 				if(xAxis == 1)
-					p[2] = 1;
+					neiborhoodPoints[2] = 1;
 				if(yAxis == COLUMNS)
-					p[3] = 1;
+					neiborhoodPoints[3] = 1;
 				if(yAxis == 1)
-					p[4] = 1;
+					neiborhoodPoints[4] = 1;
 
 				xAxis = 0;
 				yAxis = 0;
 			}
 			else
-				nova();
+				createANewRandowPoint();
 		}
 	}
 }
 
-//salva os pontos PREENCHIDOS no "fractal_fisica.txt"
-void salva()
+//salva os pontos (x,y) preechidos no "fractalPoints.txt" para plotar
+void savePointsToPlot()
 {
 
-	FILE *arq;
+	FILE *outFile;
 
-	arq = fopen("fractal_fisica.txt", "w+");
+	outFile = fopen("fractalPoints.txt", "w+");
+
 	for (int xAxis = 0; xAxis < LINES; ++xAxis)
 	{
 		for (int yAxis = 0; yAxis < COLUMNS; ++yAxis)
 		{
-			if(result[xAxis][yAxis] != 0)
-				fprintf(arq, "%d %d %d\n", xAxis,yAxis,result[xAxis][yAxis]);
+			if(matrixWithThePointToPlot[xAxis][yAxis] != 0)
+				fprintf(outFile, "%d %d \n", xAxis,yAxis);
 		}
 	}
-	fclose(arq);
+	fclose(outFile);
 }
 
 int main()
 {
-	int control;
+	int auxiliaryVarible=0;
 
-	srand(time(NULL));//seed do random
+	srand(time(NULL));
 
-	control = 0;
+	for (int xAxis = 1; xAxis <= 4; xAxis++)
+		neiborhoodPoints[xAxis] = 0;
 
-	for (int xAxis = 1; xAxis <= 4; ++xAxis)
-		p[xAxis] = 0;
-
-	for (int xAxis = 1; xAxis < LINES; ++xAxis)
+	for (int xAxis = 1; xAxis < LINES; xAxis++)
 	{
-		for (int yAxis = 1; yAxis < COLUMNS; ++yAxis)
-			result[xAxis][yAxis] = 0;
+		for (int yAxis = 1; yAxis < COLUMNS; yAxis++)
+			matrixWithThePointToPlot[xAxis][yAxis] = 0;
 	}
 
-	result[LINES/2+1][COLUMNS/2+1] = 1; //particula do centro
-	nova();
+	matrixWithThePointToPlot[LINES/2+1][COLUMNS/2+1] = 1; //particula do centro
 
-	while(control != 1)
+	createANewRandowPoint();
+
+	while(auxiliaryVarible != 1)
 	{
-		if(p[1] == 1 && p[2] == 1 && p[3] == 1 && p[4] == 1)//Se chegar no ponto em que p[] está todo 1 os pontos possíveis foram preechidos
+		//Se chegar no ponto em que todos os seus vizinhos estam todo preechidos
+		if(neiborhoodPoints[1] == 1 && neiborhoodPoints[2] == 1 && neiborhoodPoints[3] == 1 && neiborhoodPoints[4] == 1)
 		{
-			control = 1;
-			salva();
+			auxiliaryVarible = 1;
+			savePointsToPlot();
 		}
 		else
-			movimenta();
+			moveToAddANewPoint();
 	}
+
 	return 0;
 }
