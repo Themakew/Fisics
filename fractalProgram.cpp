@@ -5,10 +5,10 @@
 
 using namespace std;
 
-#define LINES 400
-#define COLUMNS 400
+#define LINES 1000
+#define COLUMNS 1000
 
-int matrixWithThePointToPlot[500][500], neiborhoodPoints[5], xAxis, yAxis;
+int matrixWithThePointToPlot[1100][1100], neiborhoodPoints[5], xAxis, yAxis;
 
 //verifica se existe pelo menos um ponto já preenchido ao redor do novo ponto criado
 int checkExistingPoint(int xAxis, int yAxis)
@@ -91,7 +91,8 @@ void moveToAddANewPoint()
 			break;
 	}
 
-	if(xAxis > LINES || xAxis < 1 || yAxis > COLUMNS || yAxis < 1)//Se chegou em um ponto fora do mapa cria uma createANewRandowPoint partícula
+//Se chegou em um ponto fora do mapa cria uma createANewRandowPoint partícula
+	if(xAxis > LINES || xAxis < 1 || yAxis > COLUMNS || yAxis < 1)
 		createANewRandowPoint();
 	else
 	{
